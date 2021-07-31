@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/Monchi/typescript-plugin-namespace-import/issues"
   },
-  "homepage": "https://github.com/Monchi/typescript-plugin-namespace-import#readme"
+  "homepage": "https://github.com/Monchi/typescript-plugin-namespace-import#readme",
+  "dependencies": {
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@ubie/prettier-config": "^0.1.0",
+    "prettier": "^2.3.2"
+  }
 }
