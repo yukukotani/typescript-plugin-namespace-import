@@ -1,5 +1,4 @@
 import TsServerLibrary, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
-import * as path from 'path';
 import * as namespaceImportPlugin from './lib/import';
 
 declare global {

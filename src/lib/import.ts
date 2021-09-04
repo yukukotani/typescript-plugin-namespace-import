@@ -1,9 +1,17 @@
 import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 
+type PluginConfig = {
+  paths: readonly string[];
+};
+
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
+  const config = info.config as PluginConfig;
+
   const currentDir = info.project.getCurrentDirectory();
-  const filePaths = info.project.readDirectory(path.resolve(currentDir, 'src/services'), ['.ts', '.js']);
+  const filePaths = config.paths.flatMap((dirPath) => {
+    return info.project.readDirectory(path.resolve(currentDir, dirPath), ['.ts', '.js']);
+  });
 
   return filePaths.map((filePath) => {
     const name = getFileNameWithoutExt(filePath);
