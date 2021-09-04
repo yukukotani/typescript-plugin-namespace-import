@@ -1,4 +1,4 @@
-import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
+import ts, { CodeFixAction, InferencePriority, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 
 type PluginConfig = {
@@ -34,8 +34,9 @@ export function getCompletionEntryDetails(
   name: string,
   selfPath: string,
   modulePath: string,
+  project: ts.server.Project,
 ): ts.CompletionEntryDetails {
-  const importPath = path.relative(path.dirname(selfPath), modulePath);
+  const importPath = transformModulePath(selfPath, modulePath, project);
   const text = `import * as ${name} from "${getFilePathWithoutExt(importPath)}";\n`;
   const action: CodeFixAction = {
     fixName: 'namespace-import',
@@ -73,4 +74,13 @@ function getFileNameWithoutExt(filePath: string): string {
 function getFilePathWithoutExt(filePath: string): string {
   const ext = path.extname(filePath);
   return filePath.slice(0, filePath.length - ext.length);
+}
+
+function transformModulePath(selfPath: string, filePath: string, project: ts.server.Project) {
+  const compilerOptions = project.getCompilerOptions();
+  if (compilerOptions.baseUrl) {
+    return path.relative(compilerOptions.baseUrl, filePath);
+  } else {
+    return './' + path.relative(path.dirname(selfPath), filePath);
+  }
 }

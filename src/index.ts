@@ -36,7 +36,7 @@ function init() {
         return getCompletionEntryDetails(fileName, position, name, options, source, preferences, data);
       }
 
-      return namespaceImportPlugin.getCompletionEntryDetails(name, fileName, data.modulePath);
+      return namespaceImportPlugin.getCompletionEntryDetails(name, fileName, data.modulePath, info.project);
     };
   }
 
