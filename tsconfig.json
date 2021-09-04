@@ -3,6 +3,7 @@
     "target": "ES2017",
     "lib": ["esnext", "dom"],
     "module": "commonjs",
+    "outDir": "dist",
     "strict": true,
     "esModuleInterop": true
   },
