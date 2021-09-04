@@ -1,15 +1,15 @@
 import ts, { CodeFixAction, InferencePriority, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 
-type PluginConfig = {
+type PluginOptions = {
   paths: readonly string[];
 };
 
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
-  const config = info.config as PluginConfig;
+  const options = info.config.options as PluginOptions;
 
   const currentDir = info.project.getCurrentDirectory();
-  const filePaths = config.paths.flatMap((dirPath) => {
+  const filePaths = options.paths.flatMap((dirPath) => {
     return info.project.readDirectory(path.resolve(currentDir, dirPath), ['.ts', '.js']);
   });
 
