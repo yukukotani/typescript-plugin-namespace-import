@@ -1,13 +1,12 @@
-import ts from 'typescript/lib/tsserverlibrary';
+import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
   const currentDir = info.project.getCurrentDirectory();
-  const filePaths = info.project.readDirectory(path.resolve(currentDir, 'src/services'));
+  const filePaths = info.project.readDirectory(path.resolve(currentDir, 'src/services'), ['.ts', '.js']);
 
   return filePaths.map((filePath) => {
-    const ext = path.extname(filePath);
-    const name = path.basename(filePath, ext);
+    const name = getFileNameWithoutExt(filePath);
     return {
       name: name,
       kind: ts.ScriptElementKind.alias,
@@ -21,4 +20,49 @@ export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.Compl
       },
     };
   });
+}
+
+export function getCompletionEntryDetails(
+  name: string,
+  selfPath: string,
+  modulePath: string,
+): ts.CompletionEntryDetails {
+  const importPath = path.relative(path.dirname(selfPath), modulePath);
+  const text = `import * as ${name} from "${getFilePathWithoutExt(importPath)}";\n`;
+  const action: CodeFixAction = {
+    fixName: 'namespace-import',
+    description: text,
+    changes: [
+      {
+        fileName: selfPath,
+        textChanges: [
+          {
+            span: {
+              start: 0,
+              length: 0,
+            },
+            newText: text,
+          },
+        ],
+      },
+    ],
+    commands: [],
+  };
+  return {
+    name: name,
+    kind: ScriptElementKind.alias,
+    kindModifiers: '',
+    displayParts: [],
+    codeActions: [action],
+  };
+}
+
+function getFileNameWithoutExt(filePath: string): string {
+  const ext = path.extname(filePath);
+  return path.basename(filePath, ext);
+}
+
+function getFilePathWithoutExt(filePath: string): string {
+  const ext = path.extname(filePath);
+  return filePath.slice(0, filePath.length - ext.length);
 }

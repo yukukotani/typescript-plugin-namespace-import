@@ -1,6 +1,6 @@
 import TsServerLibrary, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
-import { getCompletionEntries } from './lib/import';
+import * as namespaceImportPlugin from './lib/import';
 
 declare global {
   namespace ts {
@@ -8,10 +8,6 @@ declare global {
       modulePath?: string;
     }
   }
-}
-
-function stripExt(filePath: string) {
-  return filePath.slice(0, filePath.lastIndexOf('.'));
 }
 
 function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
@@ -31,7 +27,7 @@ function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
         return original;
       }
 
-      original.entries = [...original.entries, ...getCompletionEntries(info)];
+      original.entries = [...original.entries, ...namespaceImportPlugin.getCompletionEntries(info)];
 
       return original;
     };
@@ -40,34 +36,7 @@ function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
     info.languageService.getCompletionEntryDetails = (fileName, position, name, options, source, preferences, data) => {
       log('getCompletionEntryDetails', { fileName, position, name, options, source });
       if (data?.modulePath) {
-        const importPath = path.relative(path.dirname(fileName), data.modulePath);
-        const text = `import * as ${name} from "${stripExt(importPath)}";\n`;
-        const action: CodeFixAction = {
-          fixName: 'namespace-import',
-          description: text,
-          changes: [
-            {
-              fileName: fileName,
-              textChanges: [
-                {
-                  span: {
-                    start: 0,
-                    length: 0,
-                  },
-                  newText: text,
-                },
-              ],
-            },
-          ],
-          commands: [],
-        };
-        return {
-          name: name,
-          kind: ScriptElementKind.alias,
-          kindModifiers: '',
-          displayParts: [],
-          codeActions: [action],
-        };
+        return namespaceImportPlugin.getCompletionEntryDetails(name, fileName, data.modulePath);
       }
 
       return getCompletionEntryDetails(fileName, position, name, options, source, preferences, data);
