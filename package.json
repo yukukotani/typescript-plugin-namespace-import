@@ -1,7 +1,7 @@
 {
   "name": "typescript-plugin-namespace-import",
   "version": "0.1.0",
-  "description": "A TypeScript Language Service Plugin to insert Namespace Import automatically.",
+  "description": "A TypeScript Language Service Plugin to auto-complete and insert Namespace Import.",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc"
