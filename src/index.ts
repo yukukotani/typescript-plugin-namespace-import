@@ -1,5 +1,6 @@
 import TsServerLibrary, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
+import { getCompletionEntries } from './lib/import';
 
 declare global {
   namespace ts {
@@ -14,7 +15,7 @@ function stripExt(filePath: string) {
 }
 
 function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
-  function create(info: TsServerLibrary.server.PluginCreateInfo) {
+  function create(info: ts.server.PluginCreateInfo) {
     const log = (...params: unknown[]) => {
       const text = params.map((p) => (p ? JSON.stringify(p) : p)).join(' ');
       info.project.projectService.logger.info(`[namespace-import] ${text}`);
@@ -30,19 +31,7 @@ function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
         return original;
       }
 
-      const entry: ts.CompletionEntry = {
-        name: 'TestService',
-        kind: ts.ScriptElementKind.alias,
-        source: '/Users/yukukotani/ghq/github.com/ubie-inc/yukustory/packages/client/src/TestService.ts',
-        sortText: 'TestService',
-        hasAction: true,
-        isImportStatementCompletion: true,
-        data: {
-          exportName: 'TestService',
-          modulePath: '/Users/yukukotani/ghq/github.com/ubie-inc/yukustory/packages/client/src/TestService.ts',
-        },
-      };
-      original.entries.push(entry);
+      original.entries = [...original.entries, ...getCompletionEntries(info)];
 
       return original;
     };
@@ -50,7 +39,7 @@ function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
     const getCompletionEntryDetails = info.languageService.getCompletionEntryDetails;
     info.languageService.getCompletionEntryDetails = (fileName, position, name, options, source, preferences, data) => {
       log('getCompletionEntryDetails', { fileName, position, name, options, source });
-      if (name === 'TestService' && data?.modulePath) {
+      if (data?.modulePath) {
         const importPath = path.relative(path.dirname(fileName), data.modulePath);
         const text = `import * as ${name} from "${stripExt(importPath)}";\n`;
         const action: CodeFixAction = {
