@@ -1,4 +1,3 @@
-import TsServerLibrary, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as namespaceImportPlugin from './lib/import';
 
 declare global {
@@ -9,7 +8,7 @@ declare global {
   }
 }
 
-function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
+function init() {
   function create(info: ts.server.PluginCreateInfo) {
     const log = (...params: unknown[]) => {
       const text = params.map((p) => (p ? JSON.stringify(p) : p)).join(' ');
@@ -27,18 +26,17 @@ function init({ typescript: ts }: { typescript: typeof TsServerLibrary }) {
       }
 
       original.entries = [...original.entries, ...namespaceImportPlugin.getCompletionEntries(info)];
-
       return original;
     };
 
     const getCompletionEntryDetails = info.languageService.getCompletionEntryDetails;
     info.languageService.getCompletionEntryDetails = (fileName, position, name, options, source, preferences, data) => {
       log('getCompletionEntryDetails', { fileName, position, name, options, source });
-      if (data?.modulePath) {
-        return namespaceImportPlugin.getCompletionEntryDetails(name, fileName, data.modulePath);
+      if (data?.modulePath == null) {
+        return getCompletionEntryDetails(fileName, position, name, options, source, preferences, data);
       }
 
-      return getCompletionEntryDetails(fileName, position, name, options, source, preferences, data);
+      return namespaceImportPlugin.getCompletionEntryDetails(name, fileName, data.modulePath);
     };
   }
 
