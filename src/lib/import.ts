@@ -81,9 +81,11 @@ export function getCodeFixActionByName(
 function getModulePathsToImport(options: PluginOptions, project: ts.server.Project): string[] {
   const currentDir = project.getCurrentDirectory();
 
-  return options.paths.flatMap((dirPath) => {
+  const modulePaths = options.paths.flatMap((dirPath) => {
     return project.readDirectory(path.resolve(currentDir, dirPath), ['.ts', '.js']);
   });
+
+  return [...new Set(modulePaths)];
 }
 
 function getFileNameWithoutExt(filePath: string): string {
