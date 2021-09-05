@@ -75,9 +75,11 @@ Then add this plugin in `tsconfig.json`.
 
 ### paths (required)
 
+Value: `string[]`
+
 Specify directory in relative path to the project's root (`tsconfig.json`'s dir). All `.ts` or `.js` files in the directories can be Namespace Imported with auto-completion.
 
-example:
+Example:
 
 ```json
 "options": {
@@ -87,9 +89,11 @@ example:
 
 ### ignoreNamedExport
 
+Value: `boolean`
+
 If true, named export from files in `paths` won't be shown in auto-completion.
 
-example:
+Example:
 
 ```json
 "options": {
@@ -97,3 +101,20 @@ example:
   "ignoreNamedExport": true
 }
 ```
+
+### nameTransform
+
+Value: `"upperCamelCase" | "lowerCamelCase"`
+
+Transform import name. If not set, the filename will be used as an import name.
+
+Example:
+
+```json
+"options": {
+  "paths": ["src/logics"],
+  "nameTransform": "lowerCamelCase"
+}
+```
+
+Then `SomeLogic.ts` will be imported like `import * as someLogic from "./SomeLogic"`.
