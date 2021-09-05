@@ -1,8 +1,9 @@
-import ts, { CodeFixAction, InferencePriority, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
+import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 
-type PluginOptions = {
+export type PluginOptions = {
   paths: readonly string[];
+  ignoreNamedExport?: boolean;
 };
 
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
@@ -22,6 +23,22 @@ export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.Compl
         modulePath: filePath,
       },
     };
+  });
+}
+
+export function filterNamedImportEntries(
+  entries: ts.CompletionEntry[],
+  info: ts.server.PluginCreateInfo,
+): ts.CompletionEntry[] {
+  const options: PluginOptions = info.config.options;
+  if (!options.ignoreNamedExport) {
+    return entries;
+  }
+
+  const currentDir = info.project.getCurrentDirectory();
+  const dirPaths = options.paths.map((dirPath) => path.resolve(currentDir, dirPath));
+  return entries.filter((entry) => {
+    return !dirPaths.some((dirPath) => entry.data?.exportName && entry.data.fileName?.startsWith(dirPath));
   });
 }
 
