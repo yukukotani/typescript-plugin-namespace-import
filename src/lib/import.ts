@@ -88,7 +88,7 @@ function transformModulePath(selfPath: string, filePath: string, project: ts.ser
   }
 }
 
-export function getCodeFixActionFromPath(
+function getCodeFixActionFromPath(
   name: string,
   selfPath: string,
   modulePath: string,
