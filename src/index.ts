@@ -38,6 +38,19 @@ function init() {
 
       return namespaceImportPlugin.getCompletionEntryDetails(name, fileName, data.modulePath, info.project);
     };
+
+    const getCodeFixesAtPosition = info.languageService.getCodeFixesAtPosition;
+    info.languageService.getCodeFixesAtPosition = (fileName, start, end, errorCodes, formatOptions, preferences) => {
+      log('getCodeFixesAtPosition', { fileName, start, end, errorCodes, formatOptions, preferences });
+      const original = getCodeFixesAtPosition(fileName, start, end, errorCodes, formatOptions, preferences);
+
+      const importAction = namespaceImportPlugin.getCodeFixActionByName(fileName, start, end, info);
+      if (importAction) {
+        return [importAction, ...original];
+      }
+
+      return original;
+    };
   }
 
   return { create };

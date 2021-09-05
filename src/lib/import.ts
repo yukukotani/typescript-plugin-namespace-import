@@ -6,12 +6,7 @@ type PluginOptions = {
 };
 
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
-  const options = info.config.options as PluginOptions;
-
-  const currentDir = info.project.getCurrentDirectory();
-  const filePaths = options.paths.flatMap((dirPath) => {
-    return info.project.readDirectory(path.resolve(currentDir, dirPath), ['.ts', '.js']);
-  });
+  const filePaths = getPathsToImport(info.config.options, info.project);
 
   return filePaths.map((filePath) => {
     const name = getFileNameWithoutExt(filePath);
@@ -36,27 +31,7 @@ export function getCompletionEntryDetails(
   modulePath: string,
   project: ts.server.Project,
 ): ts.CompletionEntryDetails {
-  const importPath = transformModulePath(selfPath, modulePath, project);
-  const text = `import * as ${name} from "${getFilePathWithoutExt(importPath)}";\n`;
-  const action: CodeFixAction = {
-    fixName: 'namespace-import',
-    description: text,
-    changes: [
-      {
-        fileName: selfPath,
-        textChanges: [
-          {
-            span: {
-              start: 0,
-              length: 0,
-            },
-            newText: text,
-          },
-        ],
-      },
-    ],
-    commands: [],
-  };
+  const action: CodeFixAction = getCodeFixActionFromPath(name, selfPath, modulePath, project);
   return {
     name: name,
     kind: ScriptElementKind.alias,
@@ -64,6 +39,34 @@ export function getCompletionEntryDetails(
     displayParts: [],
     codeActions: [action],
   };
+}
+
+export function getCodeFixActionByName(
+  selfPath: string,
+  start: number,
+  end: number,
+  info: ts.server.PluginCreateInfo,
+): CodeFixAction | null {
+  const name = info.languageService.getProgram()?.getSourceFile(selfPath)?.text.slice(start, end);
+  if (!name) {
+    return null;
+  }
+
+  const filePaths = getPathsToImport(info.config.options, info.project);
+  const modulePath = filePaths.find((filePath) => getFileNameWithoutExt(filePath) === name);
+  if (modulePath) {
+    return getCodeFixActionFromPath(name, selfPath, modulePath, info.project);
+  } else {
+    return null;
+  }
+}
+
+function getPathsToImport(options: PluginOptions, project: ts.server.Project): string[] {
+  const currentDir = project.getCurrentDirectory();
+
+  return options.paths.flatMap((dirPath) => {
+    return project.readDirectory(path.resolve(currentDir, dirPath), ['.ts', '.js']);
+  });
 }
 
 function getFileNameWithoutExt(filePath: string): string {
@@ -83,4 +86,33 @@ function transformModulePath(selfPath: string, filePath: string, project: ts.ser
   } else {
     return './' + path.relative(path.dirname(selfPath), filePath);
   }
+}
+
+export function getCodeFixActionFromPath(
+  name: string,
+  selfPath: string,
+  modulePath: string,
+  project: ts.server.Project,
+): CodeFixAction {
+  const importPath = transformModulePath(selfPath, modulePath, project);
+  const text = `import * as ${name} from "${getFilePathWithoutExt(importPath)}";\n`;
+  return {
+    fixName: 'namespace-import',
+    description: text,
+    changes: [
+      {
+        fileName: selfPath,
+        textChanges: [
+          {
+            span: {
+              start: 0,
+              length: 0,
+            },
+            newText: text,
+          },
+        ],
+      },
+    ],
+    commands: [],
+  };
 }
