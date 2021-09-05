@@ -1,16 +1,18 @@
 import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
+import camelCase from 'camelcase';
 
 export type PluginOptions = {
   paths: readonly string[];
   ignoreNamedExport?: boolean;
+  nameTransform?: 'upperCamelCase' | 'lowerCamelCase';
 };
 
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
   const modulePaths = getModulePathsToImport(info.config.options, info.project);
 
   return modulePaths.map((modulePath) => {
-    const name = getFileNameWithoutExt(modulePath);
+    const name = transformImportName(getFileNameWithoutExt(modulePath), info.config.options);
     return {
       name: name,
       kind: ts.ScriptElementKind.alias,
@@ -46,9 +48,9 @@ export function getCompletionEntryDetails(
   name: string,
   selfPath: string,
   modulePath: string,
-  project: ts.server.Project,
+  info: ts.server.PluginCreateInfo,
 ): ts.CompletionEntryDetails {
-  const action: CodeFixAction = getCodeFixActionFromPath(name, selfPath, modulePath, project);
+  const action: CodeFixAction = getCodeFixActionFromPath(name, selfPath, modulePath, info.project);
   return {
     name: name,
     kind: ScriptElementKind.alias,
@@ -138,4 +140,12 @@ function getCodeFixActionFromPath(
     ],
     commands: [],
   };
+}
+
+function transformImportName(name: string, options: PluginOptions) {
+  if (options.nameTransform) {
+    return camelCase(name, { pascalCase: options.nameTransform === 'upperCamelCase' });
+  } else {
+    return name;
+  }
 }
