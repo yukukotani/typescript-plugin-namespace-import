@@ -5,6 +5,8 @@
 
 A [TypeScript Language Service Plugin](https://github.com/microsoft/TypeScript/wiki/Writing-a-Language-Service-Plugin) to auto-complete and insert [Namespace Import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#import_an_entire_modules_contents).
 
+![namespace](https://user-images.githubusercontent.com/16265411/132126846-9b2ab85b-45ad-427e-aac4-c6c408e53aa5.gif)
+
 ## Motivation
 
 We often use an object as a namespace.
