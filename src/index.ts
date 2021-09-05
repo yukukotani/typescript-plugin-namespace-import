@@ -25,7 +25,9 @@ function init() {
         return original;
       }
 
-      original.entries = [...original.entries, ...namespaceImportPlugin.getCompletionEntries(info)];
+      const originalEntries = namespaceImportPlugin.filterNamedImportEntries(original.entries, info);
+      const namespaceImportEntries = namespaceImportPlugin.getCompletionEntries(info);
+      original.entries = [...originalEntries, ...namespaceImportEntries];
       return original;
     };
 

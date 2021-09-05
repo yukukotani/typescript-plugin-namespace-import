@@ -76,3 +76,24 @@ Then add this plugin in `tsconfig.json`.
 ### paths (required)
 
 Specify directory in relative path to the project's root (`tsconfig.json`'s dir). All `.ts` or `.js` files in the directories can be Namespace Imported with auto-completion.
+
+example:
+
+```json
+"options": {
+  "paths": ["src/logics"]
+}
+```
+
+### ignoreNamedExport
+
+If true, named export from files in `paths` won't be shown in auto-completion.
+
+example:
+
+```json
+"options": {
+  "paths": ["src/logics"],
+  "ignoreNamedExport": true
+}
+```

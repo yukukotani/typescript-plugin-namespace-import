@@ -1,27 +1,44 @@
-import ts, { CodeFixAction, InferencePriority, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
+import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 
-type PluginOptions = {
+export type PluginOptions = {
   paths: readonly string[];
+  ignoreNamedExport?: boolean;
 };
 
 export function getCompletionEntries(info: ts.server.PluginCreateInfo): ts.CompletionEntry[] {
-  const filePaths = getPathsToImport(info.config.options, info.project);
+  const modulePaths = getModulePathsToImport(info.config.options, info.project);
 
-  return filePaths.map((filePath) => {
-    const name = getFileNameWithoutExt(filePath);
+  return modulePaths.map((modulePath) => {
+    const name = getFileNameWithoutExt(modulePath);
     return {
       name: name,
       kind: ts.ScriptElementKind.alias,
-      source: filePath,
+      source: modulePath,
       sortText: name,
       hasAction: true,
       isImportStatementCompletion: true,
       data: {
         exportName: name,
-        modulePath: filePath,
+        modulePath: modulePath,
       },
     };
+  });
+}
+
+export function filterNamedImportEntries(
+  entries: ts.CompletionEntry[],
+  info: ts.server.PluginCreateInfo,
+): ts.CompletionEntry[] {
+  const options: PluginOptions = info.config.options;
+  if (!options.ignoreNamedExport) {
+    return entries;
+  }
+
+  const currentDir = info.project.getCurrentDirectory();
+  const dirPaths = options.paths.map((dirPath) => path.resolve(currentDir, dirPath));
+  return entries.filter((entry) => {
+    return !dirPaths.some((dirPath) => entry.data?.exportName && entry.data.fileName?.startsWith(dirPath));
   });
 }
 
@@ -52,8 +69,8 @@ export function getCodeFixActionByName(
     return null;
   }
 
-  const filePaths = getPathsToImport(info.config.options, info.project);
-  const modulePath = filePaths.find((filePath) => getFileNameWithoutExt(filePath) === name);
+  const modulePaths = getModulePathsToImport(info.config.options, info.project);
+  const modulePath = modulePaths.find((filePath) => getFileNameWithoutExt(filePath) === name);
   if (modulePath) {
     return getCodeFixActionFromPath(name, selfPath, modulePath, info.project);
   } else {
@@ -61,7 +78,7 @@ export function getCodeFixActionByName(
   }
 }
 
-function getPathsToImport(options: PluginOptions, project: ts.server.Project): string[] {
+function getModulePathsToImport(options: PluginOptions, project: ts.server.Project): string[] {
   const currentDir = project.getCurrentDirectory();
 
   return options.paths.flatMap((dirPath) => {
@@ -79,23 +96,27 @@ function getFilePathWithoutExt(filePath: string): string {
   return filePath.slice(0, filePath.length - ext.length);
 }
 
-function transformModulePath(selfPath: string, filePath: string, project: ts.server.Project) {
+function getModuleSpceifier(selfPath: string, modulePath: string, project: ts.server.Project) {
   const compilerOptions = project.getCompilerOptions();
+
+  let specifier: string;
   if (compilerOptions.baseUrl) {
-    return path.relative(compilerOptions.baseUrl, filePath);
+    specifier = path.relative(compilerOptions.baseUrl, modulePath);
   } else {
-    return './' + path.relative(path.dirname(selfPath), filePath);
+    specifier = './' + path.relative(path.dirname(selfPath), modulePath);
   }
+
+  return getFilePathWithoutExt(specifier);
 }
 
-export function getCodeFixActionFromPath(
+function getCodeFixActionFromPath(
   name: string,
   selfPath: string,
   modulePath: string,
   project: ts.server.Project,
 ): CodeFixAction {
-  const importPath = transformModulePath(selfPath, modulePath, project);
-  const text = `import * as ${name} from "${getFilePathWithoutExt(importPath)}";\n`;
+  const moduleSpecifier = getModuleSpceifier(selfPath, modulePath, project);
+  const text = `import * as ${name} from "${moduleSpecifier}";\n`;
   return {
     fixName: 'namespace-import',
     description: text,
