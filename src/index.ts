@@ -21,7 +21,7 @@ function init() {
     info.languageService.getCompletionsAtPosition = (fileName, position, options) => {
       log('getCompletionsAtPosition', { fileName, position, options });
       const original = getCompletionsAtPosition(fileName, position, options);
-      if (original == null) {
+      if (original == null || options?.triggerCharacter != null) {
         return original;
       }
 
