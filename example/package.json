@@ -8,6 +8,6 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.4.2",
-    "typescript-plugin-namespace-import": "^0.3.0"
+    "typescript-plugin-namespace-import": "^0.3.1"
   }
 }
