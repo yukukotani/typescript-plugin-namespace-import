@@ -1,0 +1,13 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "Yuku Kotani (yukukotani@gmail.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.4.2",
+    "typescript-plugin-namespace-import": "^0.3.0"
+  }
+}

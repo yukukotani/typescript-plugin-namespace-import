@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "typescript-plugin-namespace-import",
+        "options": {
+          "paths": ["src/logics"],
+          "ignoreNamedExport": true
+        }
+      }
+    ]
+  },
+  "include": ["src"]
+}
