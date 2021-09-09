@@ -1,6 +1,7 @@
 import ts, { CodeFixAction, ScriptElementKind } from 'typescript/lib/tsserverlibrary';
 import * as path from 'path';
 import camelCase from 'camelcase';
+import * as tsutils from 'tsutils';
 
 export type PluginOptions = {
   paths: readonly string[];
@@ -42,6 +43,14 @@ export function filterNamedImportEntries(
   return entries.filter((entry) => {
     return !dirPaths.some((dirPath) => entry.data?.exportName && entry.data.fileName?.startsWith(dirPath));
   });
+}
+
+export function isAutoCompletablePosition(sourceFile: ts.SourceFile | undefined, position: number): boolean {
+  if (!sourceFile) {
+    return false;
+  }
+  const token = tsutils.getTokenAtPosition(sourceFile!, position)?.kind ?? ts.SyntaxKind.Unknown;
+  return token !== ts.SyntaxKind.StringLiteral;
 }
 
 export function getCompletionEntryDetails(
