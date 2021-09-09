@@ -1,3 +1,5 @@
+import ts, { SemanticClassificationFormat } from 'typescript/lib/tsserverlibrary';
+import * as tsutils from 'tsutils';
 import * as namespaceImportPlugin from './lib/import';
 
 declare global {
@@ -21,7 +23,14 @@ function init() {
     info.languageService.getCompletionsAtPosition = (fileName, position, options) => {
       log('getCompletionsAtPosition', { fileName, position, options });
       const original = getCompletionsAtPosition(fileName, position, options);
-      if (original == null || options?.triggerCharacter != null) {
+      if (
+        original == null ||
+        options?.triggerCharacter != null ||
+        !namespaceImportPlugin.isAutoCompletablePosition(
+          info.languageService.getProgram()?.getSourceFile(fileName),
+          position,
+        )
+      ) {
         return original;
       }
 
