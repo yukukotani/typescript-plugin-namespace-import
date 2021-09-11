@@ -9,6 +9,8 @@ A [TypeScript Language Service Plugin](https://github.com/microsoft/TypeScript/w
 
 ## Motivation
 
+[日本語の記事 / Japanese Article](https://zenn.dev/yuku/articles/4d2f665cf42385)
+
 We often use an object as a namespace.
 
 ```typescript
