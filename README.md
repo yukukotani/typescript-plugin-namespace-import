@@ -1,7 +1,7 @@
 # typescript-plugin-namespace-import
 
 [![npm](https://img.shields.io/npm/v/typescript-plugin-namespace-import)](https://www.npmjs.com/package/typescript-plugin-namespace-import)
-[![license](https://img.shields.io/npm/l/typescript-plugin-namespace-import)](https://github.com/Monchi/typescript-plugin-namespace-import/blob/master/LICENSE)
+[![license](https://img.shields.io/npm/l/typescript-plugin-namespace-import)](https://github.com/yukukotani/typescript-plugin-namespace-import/blob/master/LICENSE)
 
 A [TypeScript Language Service Plugin](https://github.com/microsoft/TypeScript/wiki/Writing-a-Language-Service-Plugin) to auto-complete and insert [Namespace Import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#import_an_entire_modules_contents).
 

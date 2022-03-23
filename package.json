@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Monchi/typescript-plugin-namespace-import.git"
+    "url": "git+https://github.com/yukukotani/typescript-plugin-namespace-import.git"
   },
   "author": "Yuku Kotani (yukukotani@gmail.com)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Monchi/typescript-plugin-namespace-import/issues"
+    "url": "https://github.com/yukukotani/typescript-plugin-namespace-import/issues"
   },
-  "homepage": "https://github.com/Monchi/typescript-plugin-namespace-import#readme",
+  "homepage": "https://github.com/yukukotani/typescript-plugin-namespace-import#readme",
   "dependencies": {
     "camelcase": "^6.2.0",
     "tsutils": "^3.21.0",
