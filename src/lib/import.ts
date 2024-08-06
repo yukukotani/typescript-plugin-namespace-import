@@ -114,9 +114,9 @@ function getModuleSpceifier(selfPath: string, modulePath: string, project: ts.se
 
   let specifier: string;
   if (compilerOptions.baseUrl) {
-    specifier = path.relative(compilerOptions.baseUrl, modulePath);
+    specifier = path.posix.relative(compilerOptions.baseUrl, modulePath);
   } else {
-    specifier = './' + path.relative(path.dirname(selfPath), modulePath);
+    specifier = './' + path.posix.relative(path.dirname(selfPath), modulePath);
   }
 
   return getFilePathWithoutExt(specifier);
